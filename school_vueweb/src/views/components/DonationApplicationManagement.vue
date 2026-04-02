@@ -45,7 +45,7 @@ const loadDonations = async () => {
   error.value = ''
   try {
     const [itemResponse, fundResponse] = await Promise.all([
-      donationApi.getItemDonationsPage(1, 1000, searchKeyword.value, selectedDonationType.value === 'fund' ? undefined : selectedDonationType.value),
+      donationApi.getItemDonationsPage(1, 1000, searchKeyword.value),
       donationApi.getFundDonationsPage(1, 1000, searchKeyword.value)
     ])
     

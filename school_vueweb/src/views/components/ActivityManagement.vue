@@ -8,6 +8,13 @@
         class="search-input"
         @keyup.enter="handleSearch"
       />
+      <select v-model="activityStatus" class="status-select">
+        <option value="">请选择活动状态</option>
+        <option value="0">未开始</option>
+        <option value="1">进行中</option>
+        <option value="2">已结束</option>
+        <option value="3">已取消</option>
+      </select>
       <button @click="handleSearch" class="search-btn">搜索</button>
       <button @click="resetSearch" class="reset-btn">重置</button>
     </div>
@@ -154,6 +161,7 @@ import * as publicActivityApi from '../../api/publicActivity'
 // 响应式数据
 const activities = ref<any[]>([])
 const searchKeyword = ref('')
+const activityStatus = ref('')
 const selectedIds = ref<number[]>([])
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -211,20 +219,31 @@ const loadActivities = async () => {
 }
 
 const handleSearch = async () => {
-  if (!searchKeyword.value.trim()) {
-    await loadActivities()
-    return
-  }
-  
   try {
     console.log('开始搜索活动...')
     console.log('搜索关键词:', searchKeyword.value)
+    console.log('活动状态:', activityStatus.value)
     
     // 重置到第一页
     currentPage.value = 1
     
-    // 使用分页API进行搜索
-    const result = await publicActivityApi.searchActivities(searchKeyword.value)
+    // 加载所有活动
+    let result = await publicActivityApi.getActivities()
+    
+    // 根据关键词过滤
+    if (searchKeyword.value.trim()) {
+      result = result.filter((item: any) => 
+        (item.activityName || '').toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
+        (item.location || '').toLowerCase().includes(searchKeyword.value.toLowerCase())
+      )
+    }
+    
+    // 根据状态过滤
+    if (activityStatus.value !== '') {
+      const status = Number(activityStatus.value)
+      result = result.filter((item: any) => Number(item.status) === status)
+    }
+    
     activities.value = result
     total.value = result.length
     console.log('搜索完成，结果数量:', activities.value.length)
@@ -235,6 +254,7 @@ const handleSearch = async () => {
 
 const resetSearch = async () => {
   searchKeyword.value = ''
+  activityStatus.value = ''
   currentPage.value = 1
   await loadActivities()
 }
@@ -461,11 +481,18 @@ onMounted(async () => {
   align-items: center;
 }
 
-.search-input {
+.search-input, .status-select {
   width: 300px;
   padding: 8px 12px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
+}
+
+.status-select {
+  width: 150px;
+  min-width: 150px;
+  background: white;
+  font-size: 14px;
 }
 
 .search-btn, .reset-btn {
