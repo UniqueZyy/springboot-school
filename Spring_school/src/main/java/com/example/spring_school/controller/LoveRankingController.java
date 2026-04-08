@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api/love-rankings")
+@SuppressWarnings("unchecked")
 public class LoveRankingController {
 
     @Autowired
@@ -29,11 +31,25 @@ public class LoveRankingController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RedisService redisService;
+
+    private static final String DONATION_RANKING_KEY = "love_ranking:donation";
+    private static final String ITEM_RANKING_KEY = "love_ranking:item";
+    private static final String ACTIVITY_RANKING_KEY = "love_ranking:activity";
+    private static final long CACHE_DURATION = 5;
+
     /**
      * 获取捐款榜单（前10名）
      */
     @GetMapping("/donation")
     public List<Map<String, Object>> getDonationRanking() {
+        // 尝试从Redis缓存中获取数据
+        Object cachedData = redisService.get(DONATION_RANKING_KEY);
+        if (cachedData != null && cachedData instanceof List) {
+            return (List<Map<String, Object>>) cachedData;
+        }
+        
         // 获取所有已支付的资金捐赠记录
         List<FundDonation> donations = fundDonationService.listByStatus(1);
         
@@ -65,6 +81,9 @@ public class LoveRankingController {
             }
         }
         
+        // 将结果存入Redis缓存，设置5分钟过期
+        redisService.set(DONATION_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
+        
         return ranking;
     }
 
@@ -73,8 +92,17 @@ public class LoveRankingController {
      */
     @GetMapping("/item")
     public List<Map<String, Object>> getItemRanking() {
-        // 获取所有已通过的物品捐赠记录
-        List<ItemDonation> donations = itemDonationService.listByStatus(1);
+        // 尝试从Redis缓存中获取数据
+        Object cachedData = redisService.get(ITEM_RANKING_KEY);
+        if (cachedData != null && cachedData instanceof List) {
+            return (List<Map<String, Object>>) cachedData;
+        }
+        
+        // 获取所有已通过和已寄出的物品捐赠记录
+        List<ItemDonation> donations = new ArrayList<>();
+        donations.addAll(itemDonationService.listByStatus(1)); // 已通过
+        donations.addAll(itemDonationService.listByStatus(3)); // 已寄出
+        System.out.println("Total item donations: " + donations.size());
         
         // 按用户ID分组并计算总数量
         Map<Long, Integer> userItemMap = new HashMap<>();
@@ -82,12 +110,14 @@ public class LoveRankingController {
             userItemMap.put(donation.getDonorId(), 
                 userItemMap.getOrDefault(donation.getDonorId(), 0) + donation.getQuantity());
         }
+        System.out.println("Total users with donations: " + userItemMap.size());
         
         // 转换为列表并排序
         List<Map.Entry<Long, Integer>> sortedEntries = userItemMap.entrySet().stream()
             .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
             .limit(10)
             .collect(Collectors.toList());
+        System.out.println("Top users: " + sortedEntries.size());
         
         // 构建返回结果
         List<Map<String, Object>> ranking = new ArrayList<>();
@@ -103,6 +133,10 @@ public class LoveRankingController {
                 ranking.add(item);
             }
         }
+        System.out.println("Final ranking size: " + ranking.size());
+        
+        // 将结果存入Redis缓存，设置5分钟过期
+        redisService.set(ITEM_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
         
         return ranking;
     }
@@ -112,6 +146,12 @@ public class LoveRankingController {
      */
     @GetMapping("/activity")
     public List<Map<String, Object>> getActivityRanking() {
+        // 尝试从Redis缓存中获取数据
+        Object cachedData = redisService.get(ACTIVITY_RANKING_KEY);
+        if (cachedData != null && cachedData instanceof List) {
+            return (List<Map<String, Object>>) cachedData;
+        }
+        
         // 获取所有已通过的活动申请
         List<PublicActivityApplication> applications = publicActivityApplicationService.listByStatus(1);
         
@@ -142,6 +182,9 @@ public class LoveRankingController {
                 ranking.add(item);
             }
         }
+        
+        // 将结果存入Redis缓存，设置5分钟过期
+        redisService.set(ACTIVITY_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
         
         return ranking;
     }

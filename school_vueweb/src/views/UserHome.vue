@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { ref, onMounted, computed } from 'vue'
-import * as publicActivityApi from '../api/publicActivity'
-import * as donationApi from '../api/donation'
-import type { PublicActivityType, PublicActivity, PublicActivityApplication } from '../api/publicActivity'
-import type { DonationRecord, DonationProject } from '../api/donation'
+import { ref, onMounted } from 'vue'
+
 
 // 导入新的组件
 import AnnouncementView from './components/AnnouncementView.vue'
@@ -16,16 +13,13 @@ import ActivityApplicationManagement from './components/ActivityApplicationManag
 import DonationItemManagement from './components/DonationItemManagement.vue'
 import DonationFundManagement from './components/DonationFundManagement.vue'
 import FeedbackSubmit from './components/FeedbackSubmit.vue'
+import UserProfile from './components/UserProfile.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 const activeNav = ref('公告信息')
 const expandedMenu = ref<string | null>(null)
 
-// 计算当前用户角色
-const currentUserRole = computed(() => {
-  return userStore.userInfo?.roleType || 0
-})
 
 // 初始化用户信息
 onMounted(() => {
@@ -144,6 +138,13 @@ const toggleMenu = (menu: string) => {
               <span>反馈信息</span>
             </div>
           </li>
+          
+          <li class="nav-item" :class="{ active: activeNav === '个人信息' }" @click="setActiveNav('个人信息')">
+            <div class="nav-item-content">
+              <img src="../assets/用户.svg" alt="个人信息" class="nav-icon" />
+              <span>个人信息</span>
+            </div>
+          </li>
         </ul>
       </aside>
       
@@ -182,7 +183,11 @@ const toggleMenu = (menu: string) => {
           <FeedbackSubmit />
         </div>
         
-        <div class="content-section" v-if="activeNav !== '公告信息' && activeNav !== '爱心榜单' && activeNav !== '爱心事迹' && activeNav !== '公益活动浏览' && activeNav !== '公益活动申请管理' && activeNav !== '捐赠物品管理' && activeNav !== '捐赠资金管理' && activeNav !== '反馈信息'">
+        <div class="content-section" v-if="activeNav === '个人信息'">
+          <UserProfile />
+        </div>
+        
+        <div class="content-section" v-if="activeNav !== '公告信息' && activeNav !== '爱心榜单' && activeNav !== '爱心事迹' && activeNav !== '公益活动浏览' && activeNav !== '公益活动申请管理' && activeNav !== '捐赠物品管理' && activeNav !== '捐赠资金管理' && activeNav !== '反馈信息' && activeNav !== '个人信息'">
           <div class="section-header">
             <h2>{{ activeNav }}</h2>
             <button class="btn-primary">添加新记录</button>

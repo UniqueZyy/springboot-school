@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import * as donationApi from '../../api/donation'
 import * as publicActivityApi from '../../api/publicActivity'
 
@@ -48,6 +48,18 @@ onMounted(() => {
   loadItemRanking()
   loadActivityRanking()
 })
+
+// 当组件被激活时重新加载数据
+onActivated(() => {
+  loadDonationRanking()
+  loadItemRanking()
+  loadActivityRanking()
+})
+
+// 页面加载时立即获取数据
+loadDonationRanking()
+loadItemRanking()
+loadActivityRanking()
 </script>
 
 <template>

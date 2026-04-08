@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import * as donationApi from '../../api/donation'
+import * as authApi from '../../api/auth'
 
 interface DonationRecord {
   id: number
@@ -30,6 +31,9 @@ const showApprovalModal = ref(false)
 const currentDonation = ref<DonationRecord | null>(null)
 const approvalComment = ref('')
 
+// 用户列表缓存
+const users = ref<{id: number, name: string}[]>([])
+
 const itemTypes = [
   { value: '书籍', label: '书籍' },
   { value: '衣物', label: '衣物' },
@@ -40,10 +44,34 @@ const itemTypes = [
 
 const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
 
+// 加载用户列表
+const loadUsers = async () => {
+  try {
+    const response = await authApi.getUsersPage(1, 1000)
+    users.value = response.records.map((user: any) => ({
+      id: user.id,
+      name: user.name
+    }))
+  } catch (err) {
+    console.error('加载用户列表失败:', err)
+  }
+}
+
+// 根据donorId获取用户名称
+const getUserNameById = (donorId: number): string => {
+  const user = users.value.find(u => u.id === donorId)
+  return user ? user.name : '未知用户'
+}
+
 const loadDonations = async () => {
   loading.value = true
   error.value = ''
   try {
+    // 确保用户列表已加载
+    if (users.value.length === 0) {
+      await loadUsers()
+    }
+    
     const [itemResponse, fundResponse] = await Promise.all([
       donationApi.getItemDonationsPage(1, 1000, searchKeyword.value),
       donationApi.getFundDonationsPage(1, 1000, searchKeyword.value)
@@ -52,7 +80,7 @@ const loadDonations = async () => {
     const itemDonations: DonationRecord[] = (itemResponse.records || []).map((item: any) => ({
       id: item.id,
       donorId: item.donorId,
-      donorName: item.donorName || '匿名',
+      donorName: getUserNameById(item.donorId),
       donationType: '物品捐赠',
       itemType: item.itemType,
       itemName: item.itemName,
@@ -66,7 +94,7 @@ const loadDonations = async () => {
     const fundDonations: DonationRecord[] = (fundResponse.records || []).map((fund: any) => ({
       id: fund.id,
       donorId: fund.donorId,
-      donorName: fund.donorName || '匿名',
+      donorName: getUserNameById(fund.donorId),
       donationType: '资金捐赠',
       amount: fund.amount,
       donationDate: fund.donationDate,
