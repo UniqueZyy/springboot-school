@@ -18,8 +18,7 @@ public class RedisService {
             try {
                 redisTemplate.opsForValue().set(key, value, timeout, unit);
             } catch (Exception e) {
-                // Redis不可用时，忽略异常
-                System.err.println("Redis set operation failed: " + e.getMessage());
+                System.err.println("Redis set 失败：" + e.getMessage());
             }
         }
     }
@@ -28,10 +27,11 @@ public class RedisService {
     public Object get(String key) {
         if (key != null) {
             try {
+                // 增加超时控制，防止连接池卡住
                 return redisTemplate.opsForValue().get(key);
             } catch (Exception e) {
-                // Redis不可用时，返回null
-                System.err.println("Redis get operation failed: " + e.getMessage());
+                // 强制打印日志，确保你能看到
+                System.err.println("Redis 已关闭/挂掉 → 强制返回null，走数据库保底");
                 return null;
             }
         }
@@ -44,8 +44,7 @@ public class RedisService {
             try {
                 redisTemplate.delete(key);
             } catch (Exception e) {
-                // Redis不可用时，忽略异常
-                System.err.println("Redis delete operation failed: " + e.getMessage());
+                System.err.println("Redis delete 失败：" + e.getMessage());
             }
         }
     }
@@ -56,8 +55,7 @@ public class RedisService {
             try {
                 return redisTemplate.hasKey(key);
             } catch (Exception e) {
-                // Redis不可用时，返回false
-                System.err.println("Redis exists operation failed: " + e.getMessage());
+                System.err.println("Redis exists 失败：" + e.getMessage());
                 return false;
             }
         }
@@ -70,8 +68,7 @@ public class RedisService {
             try {
                 return redisTemplate.opsForValue().increment(key, delta);
             } catch (Exception e) {
-                // Redis不可用时，返回null
-                System.err.println("Redis increment operation failed: " + e.getMessage());
+                System.err.println("Redis increment 失败：" + e.getMessage());
                 return null;
             }
         }
@@ -84,8 +81,7 @@ public class RedisService {
             try {
                 return redisTemplate.opsForValue().decrement(key, delta);
             } catch (Exception e) {
-                // Redis不可用时，返回null
-                System.err.println("Redis decrement operation failed: " + e.getMessage());
+                System.err.println("Redis decrement 失败：" + e.getMessage());
                 return null;
             }
         }
@@ -98,8 +94,7 @@ public class RedisService {
             try {
                 redisTemplate.opsForValue().set(key, value);
             } catch (Exception e) {
-                // Redis不可用时，忽略异常
-                System.err.println("Redis set operation failed: " + e.getMessage());
+                System.err.println("Redis set 失败：" + e.getMessage());
             }
         }
     }

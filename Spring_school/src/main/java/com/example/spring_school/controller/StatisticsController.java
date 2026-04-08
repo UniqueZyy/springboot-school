@@ -101,7 +101,11 @@ public class StatisticsController {
         summary.put("totalStudentCount", totalStudentCount);
         
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(DASHBOARD_SUMMARY_KEY, summary, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(DASHBOARD_SUMMARY_KEY, summary, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return summary;
     }
@@ -156,7 +160,11 @@ public class StatisticsController {
         }
 
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(MONTHLY_FUND_DONATION_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(MONTHLY_FUND_DONATION_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return result;
     }
@@ -197,7 +205,11 @@ public class StatisticsController {
         }
 
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(ITEM_DONATION_BY_TYPE_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(ITEM_DONATION_BY_TYPE_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return result;
     }
@@ -250,7 +262,11 @@ public class StatisticsController {
         result.put("totalItemCount", totalItemCount);
 
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(DONATION_DISTRIBUTION_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(DONATION_DISTRIBUTION_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return result;
     }
@@ -310,7 +326,11 @@ public class StatisticsController {
         }
 
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(ACTIVITY_PARTICIPATION_BY_TYPE_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(ACTIVITY_PARTICIPATION_BY_TYPE_KEY, result, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return result;
     }

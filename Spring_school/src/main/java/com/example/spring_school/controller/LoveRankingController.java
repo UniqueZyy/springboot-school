@@ -82,7 +82,11 @@ public class LoveRankingController {
         }
         
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(DONATION_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(DONATION_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return ranking;
     }
@@ -136,7 +140,11 @@ public class LoveRankingController {
         System.out.println("Final ranking size: " + ranking.size());
         
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(ITEM_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(ITEM_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return ranking;
     }
@@ -184,7 +192,11 @@ public class LoveRankingController {
         }
         
         // 将结果存入Redis缓存，设置5分钟过期
-        redisService.set(ACTIVITY_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
+        try {
+            redisService.set(ACTIVITY_RANKING_KEY, ranking, CACHE_DURATION, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            System.err.println("Redis set 失败，继续返回数据: " + e.getMessage());
+        }
         
         return ranking;
     }

@@ -240,7 +240,7 @@ const initCharts = async () => {
           type: 'bar',
           data: itemData,
           itemStyle: {
-            color: function(params) {
+            color: function(params: any) {
               const colors = ['#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272']
               return colors[params.dataIndex % colors.length]
             }
@@ -280,7 +280,7 @@ const initCharts = async () => {
           type: 'bar',
           data: activityData,
           itemStyle: {
-            color: function(params) {
+            color: function(params: any) {
               const colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666']
               return colors[params.dataIndex % colors.length]
             }
@@ -312,7 +312,7 @@ const initCharts = async () => {
             formatter: '{b}: {d}%'
           },
           itemStyle: {
-            color: function(params) {
+            color: function(params: any) {
               const colors = ['#5470c6', '#91cc75']
               return colors[params.dataIndex % colors.length]
             }
@@ -420,11 +420,11 @@ const loadMockCharts = () => {
         type: 'bar',
         data: itemData,
         itemStyle: {
-          color: function(params) {
-            const colors = ['#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272']
-            return colors[params.dataIndex % colors.length]
+            color: function(params: any) {
+              const colors = ['#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272']
+              return colors[params.dataIndex % colors.length]
+            }
           }
-        }
       }]
     })
   }
@@ -457,11 +457,11 @@ const loadMockCharts = () => {
         type: 'bar',
         data: activityData,
         itemStyle: {
-          color: function(params) {
-            const colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666']
-            return colors[params.dataIndex % colors.length]
+            color: function(params: any) {
+              const colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666']
+              return colors[params.dataIndex % colors.length]
+            }
           }
-        }
       }]
     })
   }
@@ -490,11 +490,11 @@ const loadMockCharts = () => {
           formatter: '{b}: {d}%'
         },
         itemStyle: {
-          color: function(params) {
-            const colors = ['#5470c6', '#91cc75']
-            return colors[params.dataIndex % colors.length]
-          }
-        },
+            color: function(params: any) {
+              const colors = ['#5470c6', '#91cc75']
+              return colors[params.dataIndex % colors.length]
+            }
+          },
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
